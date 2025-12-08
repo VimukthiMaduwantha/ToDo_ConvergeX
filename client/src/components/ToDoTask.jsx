@@ -123,6 +123,8 @@ function ToDoTask() {
                                         <Grid size={{ md: 12, xs: 12 }}>
                                             <TextField
                                                 fullWidth
+                                                multiline
+                                                minRows={5}
                                                 error={Boolean(touched.taskDecription && errors.taskDecription)}
                                                 helperText={touched.taskDecription && errors.taskDecription}
                                                 name='taskDecription'
@@ -133,8 +135,17 @@ function ToDoTask() {
                                                 size="small"
                                                 type='text'
                                                 placeholder='Task Description'
-                                                multiline
-                                                minRows={5}
+                                                inputProps={{
+                                                    style: {
+                                                        maxHeight: "150px",
+                                                        overflowY: "auto"
+                                                    }
+                                                }}
+                                                sx={{
+                                                    "& .MuiInputBase-inputMultiline": {
+                                                        overflowY: "auto !important"
+                                                    }
+                                                }}
                                             />
                                         </Grid>
                                         <Grid size={{ md: 12, xs: 12 }} sx={{ display: 'flex', justifyContent: 'end' }}>

@@ -1,0 +1,57 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # 1. MySQL Database Service
+  mysql_db:
+    image: mysql:8.0
+    container_name: todo_mysql_db
+    restart: always
+    environment:
+      # These must match the values set in your server/.env file
+      MYSQL_ROOT_PASSWORD: mypassword
+      MYSQL_DATABASE: todotasks
+    ports:
+      # Optional: Map DB port for local access/tools
+      - "3307:3306"
+    volumes:
+      # Persist data using a named volume
+      - db_data:/var/lib/mysql
+      # --- ADD THIS HEALTHCHECK BLOCK ---
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Node.js Backend Service
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: todo_backend
+    restart: always
+    env_file:
+      # Load environment variables (DB_HOST, DB_NAME, etc.)
+      - ./server/.env
+    ports:
+      # Map container port 8000 to host port 8000
+      - "8000:8000"
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+
+  # 3. React Frontend Service
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: todo_frontend
+    restart: always
+    ports:
+      # Map container port 80 (Nginx) to host port 3000
+      - "3000:80"
+
+# Named volume for persistent database storage
+volumes:
+  db_data:
